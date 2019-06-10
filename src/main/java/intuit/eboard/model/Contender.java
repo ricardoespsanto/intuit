@@ -23,12 +23,10 @@ public class Contender {
   @GeneratedValue
   private UUID id;
 
-  @Column(nullable = false)
   @NonNull
   @OneToOne
-  private Citizen self;
+  private Citizen citizen;
 
-  @OneToOne
   @NonNull
   private Manifesto manifesto;
 

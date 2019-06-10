@@ -7,9 +7,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.Type;
-import org.hibernate.validator.constraints.Range;
 
 @Data
 @Entity
@@ -20,9 +20,12 @@ public class Idea {
   @GeneratedValue
   private UUID id;
 
-  @Column(nullable = false)
+  @Column
   @Type(type = "short")
-  @Range(max = 10)
   private Collection<Short> ratings;
+
+  @Column(nullable = false)
+  @NonNull
+  private String theIdea;
 
 }

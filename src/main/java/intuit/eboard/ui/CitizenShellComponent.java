@@ -20,17 +20,17 @@ public class CitizenShellComponent {
     this.ideaService = ideaService;
   }
 
-  @ShellMethod
+  @ShellMethod("Nominate yourself")
   public void nominateSelf(@NonNull String ownName) {
     contenderService.nominateSelf(ownName);
   }
 
-  @ShellMethod
+  @ShellMethod("Rate an idea")
   public void rateIdea(@NonNull Idea idea, @NonNull Short rating) {
     ideaService.rateIdea(idea, rating);
   }
 
-  @ShellMethod
+  @ShellMethod("Delete your own rating")
   public void deleteOwnRating(@NonNull Idea idea) {
     ideaService.deleteRating(idea);
   }
