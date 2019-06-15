@@ -1,38 +1,32 @@
 package intuit.eboard.ui;
 
-import intuit.eboard.model.Idea;
-import intuit.eboard.service.ContenderService;
-import intuit.eboard.service.IdeaService;
+import intuit.eboard.model.Citizen;
+import intuit.eboard.service.CitizenService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
 @ShellComponent
+@ShellCommandGroup("Citizen Menu")
 public class CitizenShellComponent {
 
-  private ContenderService contenderService;
+  private CitizenService citizenService;
 
-  private IdeaService ideaService;
-
-  public CitizenShellComponent(ContenderService contenderService,
-      IdeaService ideaService) {
-    this.contenderService = contenderService;
-    this.ideaService = ideaService;
+  @Autowired
+  public CitizenShellComponent(CitizenService citizenService) {
+    this.citizenService = citizenService;
   }
 
-  @ShellMethod("Nominate yourself")
-  public void nominateSelf(@NonNull String ownName) {
-    contenderService.nominateSelf(ownName);
+  @ShellMethod("Register a citizen")
+  public Citizen registerCitizen(@NonNull String citizenName) {
+    return citizenService.save(new Citizen(citizenName));
   }
 
-  @ShellMethod("Rate an idea")
-  public void rateIdea(@NonNull Idea idea, @NonNull Short rating) {
-    ideaService.rateIdea(idea, rating);
-  }
-
-  @ShellMethod("Delete your own rating")
-  public void deleteOwnRating(@NonNull Idea idea) {
-    ideaService.deleteRating(idea);
+  @ShellMethod("List all citizens")
+  public Iterable<Citizen> listAllCitizens() {
+    return citizenService.findAll();
   }
 
 }

@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 @Entity
 @Data
@@ -22,6 +23,7 @@ public class Citizen {
 
   @Column(nullable = false)
   @NonNull
+  @Length(min = 2)
   private String name;
 
 }

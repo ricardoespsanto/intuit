@@ -1,39 +1,32 @@
 package intuit.eboard.ui;
 
 import intuit.eboard.model.Contender;
-import intuit.eboard.model.Manifesto;
 import intuit.eboard.service.ContenderService;
-import intuit.eboard.service.IdeaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
+import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
 @ShellComponent
+@ShellCommandGroup("Contender Menu")
 public class ContenderShellComponent {
 
   private ContenderService contenderService;
 
-  private IdeaService ideaService;
-
   @Autowired
-  public ContenderShellComponent(ContenderService contenderService, IdeaService ideaService) {
+  public ContenderShellComponent(ContenderService contenderService) {
     this.contenderService = contenderService;
-    this.ideaService = ideaService;
   }
 
   @ShellMethod("List all contenders")
-  public Iterable<Contender> listContenders() {
+  public Iterable<Contender> listAllContenders() {
     return contenderService.getAllContenders();
   }
 
-  @ShellMethod("Post manifesto on Board")
-  public void postManifesto(Manifesto manifesto) {
-    manifestoService.postManifestoOntoBoard(manifesto);
-  }
-
-  @ShellMethod("Post an idea")
-  public void postIdea(String contenderName, String idea) {
-    ideaService.postIdea(contenderName, idea);
+  @ShellMethod("Nominate contender")
+  public Contender nominateContender(@NonNull String contender) {
+    return contenderService.newContender(contender);
   }
 
 }

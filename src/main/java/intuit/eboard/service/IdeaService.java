@@ -2,44 +2,63 @@ package intuit.eboard.service;
 
 import intuit.eboard.model.Contender;
 import intuit.eboard.model.Idea;
-import intuit.eboard.model.Manifesto;
 import intuit.eboard.persistency.IdeaRepository;
+import java.util.Optional;
+import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 @Service
+@EnableTransactionManagement
+@Validated
 public class IdeaService {
 
-  private static final int MAXIMUM_NUMBER_OF_IDEAS_PER_CONTENDER = 4;
+  private static final Logger logger = LoggerFactory.getLogger(IdeaService.class);
+
+  @Value("${maximum_number_of_ideas:3}")
+  private int maximumNumberOfIdeasPerContender;
 
   private IdeaRepository ideaRepository;
 
-  public IdeaService(IdeaRepository ideaRepository) {
+  private ContenderService contenderService;
+
+  public IdeaService(IdeaRepository ideaRepository, ContenderService contenderService) {
     this.ideaRepository = ideaRepository;
+    this.contenderService = contenderService;
   }
 
-  public void postIdea(String contenderName, String idea) {
-    ideaRepository.save(new Idea(idea));
-    contenderRepository.findContenderByCitizenName(contenderName).ifPresent(contender -> addIdeaToManifesto(contender, idea));
-  }
-
-  public void rateIdea(Idea idea,  Short rating) {
-    idea.getRatings().add(rating);
-    if (rating > 5) {
-
+  @Transactional
+  public Idea postIdea(String contenderName, String idea) {
+    Optional<Contender> optionalContender = contenderService.findContenderByName(contenderName);
+    if (optionalContender.isEmpty()) {
+      logger.warn("Couldn't find a contender by the name {}", contenderName);
+      return null;
     }
-  }
 
-  public void deleteRating(Idea idea) {
-
-  }
-
-  public void addIdeaToManifesto(Contender contender, String idea) {
-    Manifesto manifesto = contender.getManifesto();
-    if (manifesto.getIdeas().size() < MAXIMUM_NUMBER_OF_IDEAS_PER_CONTENDER) {
-      Idea savedIdea = ideaRepository.save(new Idea(idea));
-      manifesto.getIdeas().add(savedIdea);
+    Contender contender = optionalContender.get();
+    if (contender.getIdeas().size() < maximumNumberOfIdeasPerContender) {
+      final Idea savedIdea = ideaRepository.save(new Idea(idea, contender));
+      notifyFollowers(savedIdea);
+      return savedIdea;
     } else {
-      throw new RuntimeException("Contender has reached maximum number of ideas allowed");
+      logger.info("Contender {} is only allowed {} ideas", contender,
+          maximumNumberOfIdeasPerContender);
+      return null;
     }
+  }
+
+  private void notifyFollowers(Idea savedIdea) {
+    savedIdea.getContender().getFollowers()
+        .forEach(citizen -> logger.info("Hi {}, {} just posted a new Idea: {} !", citizen.getName(),
+            savedIdea.getContender().getCitizen().getName(), savedIdea.getTheIdea()));
+  }
+
+  public Optional<Idea> findById(UUID ideaId) {
+    return ideaRepository.findById(ideaId);
   }
 }

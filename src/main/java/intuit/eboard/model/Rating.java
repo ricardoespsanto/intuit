@@ -1,42 +1,41 @@
 package intuit.eboard.model;
 
-import java.util.Collection;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString.Exclude;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
+import org.hibernate.validator.constraints.Range;
 
-@Data
 @Entity
 @NoArgsConstructor
 @RequiredArgsConstructor
-public class Idea {
+@Data
+public class Rating {
 
   @Id
   @GeneratedValue
   private UUID id;
 
-  @OneToMany(mappedBy = "idea")
-  @Cascade(CascadeType.ALL)
-  private Collection<Rating> ratings;
-
-  @Column(nullable = false)
+  @Column
   @NonNull
-  private String theIdea;
+  @Range(max = 10)
+  private Short rate;
 
+  @OneToOne
   @NonNull
-  @ManyToOne
   @Exclude
-  private Contender contender;
+  private Citizen rater;
+
+  @OneToOne
+  @NonNull
+  @Exclude
+  private Idea idea;
 
 }
